@@ -33,7 +33,7 @@ variables can be used:
 variables can be used:
 
 KEY	TYPE	VALUE	DEFAULT	REQUIRED	DESCRIPTION
-{{range .}}{{usage_key .}}	{{usage_value .}}	{{usage_type .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
+{{range .}}{{usage_key .}}	{{usage_type .}}	{{usage_value .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
 {{end}}
 `
 )
