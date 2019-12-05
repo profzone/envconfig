@@ -57,6 +57,47 @@ type EnvVar struct {
 	Tags  reflect.StructTag
 }
 
+func (e EnvVar) GetValue(security bool) string {
+	rv := e.Field
+	switch rv.Kind() {
+	case reflect.Slice, reflect.Array:
+		values := make([]string, 0)
+		for i := 0; i < rv.Len(); i++ {
+			values = append(values, stringValueOf(rv.Index(i), security))
+		}
+		return strings.Join(values, ", ")
+	default:
+		return stringValueOf(rv, security)
+	}
+}
+
+type ISecurityStringer interface {
+	SecurityString() string
+}
+
+func stringValueOf(rv reflect.Value, security bool) string {
+	v := rv.Interface()
+	switch rv.Kind() {
+	case reflect.Array, reflect.Slice:
+		values := make([]string, 0)
+		for i := 0; i < rv.Len(); i++ {
+			values = append(values, stringValueOf(rv.Index(i), security))
+		}
+		return strings.Join(values, ",")
+	default:
+		if security {
+			if securityStringer, ok := v.(ISecurityStringer); ok {
+				return securityStringer.SecurityString()
+			}
+		}
+		s, err := ConvertToStr(v)
+		if err != nil {
+			panic(err)
+		}
+		return s
+	}
+}
+
 // GatherInfo gathers information about the specified struct
 func GatherInfo(prefix string, spec interface{}) ([]EnvVar, error) {
 	s := reflect.ValueOf(spec)
