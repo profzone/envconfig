@@ -24,6 +24,7 @@ variables can be used:
 {{usage_key .}}
   [description] {{usage_description .}}
   [type]        {{usage_type .}}
+  [value]       {{usage_value .}}
   [default]     {{usage_default .}}
   [required]    {{usage_required .}}{{end}}
 `
@@ -31,9 +32,10 @@ variables can be used:
 	DefaultTableFormat = `This application is configured via the environment. The following environment
 variables can be used:
 
-KEY	TYPE	DEFAULT	REQUIRED	DESCRIPTION
-{{range .}}{{usage_key .}}	{{usage_type .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
-{{end}}`
+KEY	TYPE	VALUE	DEFAULT	REQUIRED	DESCRIPTION
+{{range .}}{{usage_key .}}	{{usage_value .}}	{{usage_type .}}	{{usage_default .}}	{{usage_required .}}	{{usage_description .}}
+{{end}}
+`
 )
 
 var (
@@ -128,6 +130,7 @@ func Usagef(prefix string, spec interface{}, out io.Writer, format string) error
 		"usage_key":         func(v EnvVar) string { return v.Key },
 		"usage_description": func(v EnvVar) string { return v.Tags.Get("desc") },
 		"usage_type":        func(v EnvVar) string { return toTypeDescription(v.Field.Type()) },
+		"usage_value":       func(v EnvVar) string { return v.GetValue(false) },
 		"usage_default":     func(v EnvVar) string { return v.Tags.Get("default") },
 		"usage_required": func(v EnvVar) (string, error) {
 			req := v.Tags.Get("required")
