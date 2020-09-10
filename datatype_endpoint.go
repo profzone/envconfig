@@ -1,4 +1,4 @@
-package envconf
+package envconfig
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-courier/reflectx"
+	"github.com/profzone/eden-framework/pkg/reflectx"
 )
 
 func ParseEndpoint(text string) (*Endpoint, error) {
