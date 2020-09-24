@@ -1,14 +1,9 @@
 package envconfig
 
 import (
-	"fmt"
-	"go/ast"
 	"net/url"
-	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
 )
 
 func ParseEndpoint(text string) (*Endpoint, error) {
@@ -111,55 +106,4 @@ func (e *Endpoint) UnmarshalText(text []byte) error {
 
 func (e Endpoint) MarshalText() (text []byte, err error) {
 	return []byte(e.String()), nil
-}
-
-func UnmarshalExtra(extra url.Values, v interface{}) error {
-	rv := reflect.ValueOf(v)
-
-	kind := rv.Kind()
-
-	if kind != reflect.Ptr {
-		return fmt.Errorf("non-ptr value %v is not support", v)
-	}
-
-	rv = rv.Elem()
-
-	if rv.Kind() != reflect.Struct {
-		return nil
-	}
-
-	structTpe := rv.Type()
-
-	for i := 0; i < rv.NumField(); i++ {
-		field := structTpe.Field(i)
-
-		name := field.Name
-
-		if !ast.IsExported(name) {
-			continue
-		}
-
-		if tag, ok := field.Tag.Lookup("name"); ok {
-			n, _ := tagValueAndFlags(tag)
-			if n == "-" {
-				continue
-			}
-			if n != "" {
-				name = n
-			}
-		}
-
-		fieldValue := rv.Field(i)
-
-		value := extra.Get(name)
-		if value == "" {
-			value = field.Tag.Get("default")
-		}
-
-		if err := reflectx.UnmarshalText(fieldValue, []byte(value)); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
