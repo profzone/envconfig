@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/profzone/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 )
 
 func ParseEndpoint(text string) (*Endpoint, error) {
