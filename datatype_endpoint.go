@@ -57,7 +57,7 @@ func (e Endpoint) IsZero() bool {
 }
 
 func (e Endpoint) SecurityString() string {
-	e.Password = strings.Repeat("-", len(e.Password))
+	e.Password = strings.Repeat("*", len(e.Password))
 	return e.String()
 }
 
