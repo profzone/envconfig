@@ -112,25 +112,25 @@ func toTypeDescription(t reflect.Type) string {
 }
 
 // Usage writes usage information to stdout using the default header and table format
-func Usage(prefix string, spec interface{}) error {
+func Usage(prefix string, spec interface{}, security bool) error {
 	// The default is to output the usage information as a table
 	// Create tabwriter instance to support table output
 	tabs := tabwriter.NewWriter(os.Stdout, 1, 0, 4, ' ', 0)
 
-	err := Usagef(prefix, spec, tabs, DefaultTableFormat)
+	err := Usagef(prefix, spec, tabs, DefaultTableFormat, security)
 	tabs.Flush()
 	return err
 }
 
 // Usagef writes usage information to the specified io.Writer using the specifed template specification
-func Usagef(prefix string, spec interface{}, out io.Writer, format string) error {
+func Usagef(prefix string, spec interface{}, out io.Writer, format string, security bool) error {
 
 	// Specify the default usage template functions
 	functions := template.FuncMap{
 		"usage_key":         func(v EnvVar) string { return v.Key },
 		"usage_description": func(v EnvVar) string { return v.Tags.Get("desc") },
 		"usage_type":        func(v EnvVar) string { return toTypeDescription(v.Field.Type()) },
-		"usage_value":       func(v EnvVar) string { return v.GetValue(false) },
+		"usage_value":       func(v EnvVar) string { return v.GetValue(security) },
 		"usage_default":     func(v EnvVar) string { return v.Tags.Get("default") },
 		"usage_required": func(v EnvVar) (string, error) {
 			req := v.Tags.Get("required")
