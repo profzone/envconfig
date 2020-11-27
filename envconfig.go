@@ -8,6 +8,8 @@ import (
 	"encoding"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"regexp"
@@ -21,6 +23,8 @@ var ErrInvalidSpecification = errors.New("specification must be a struct pointer
 
 var gatherRegexp = regexp.MustCompile("([^A-Z]+|[A-Z]+[^A-Z]+|[A-Z]+)")
 var acronymRegexp = regexp.MustCompile("([A-Z]+)([A-Z][^A-Z]+)")
+
+var defaultValue = make(map[string]string)
 
 // A ParseError occurs when an environment variable cannot be converted to
 // the type required by a struct field during assignment.
@@ -221,6 +225,14 @@ func CheckDisallowed(prefix string, spec interface{}) error {
 	return nil
 }
 
+func LoadDefaultFromYml(filePath string) error {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(data, defaultValue)
+}
+
 // Process populates the specified struct based on environment variables
 func Process(prefix string, spec interface{}) error {
 	infos, err := GatherInfo(prefix, spec)
@@ -241,8 +253,13 @@ func Process(prefix string, spec interface{}) error {
 			value = def
 		}
 
+		defFromYml, defExist := defaultValue[info.Key]
+		if def == "" && !ok && defExist && defFromYml != "" {
+			value = defFromYml
+		}
+
 		req := info.Tags.Get("required")
-		if !ok && def == "" {
+		if !ok && def == "" && !defExist {
 			if isTrue(req) {
 				key := info.Key
 				if info.Alt != "" {
